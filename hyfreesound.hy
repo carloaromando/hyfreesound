@@ -10,26 +10,39 @@
 (setv *search-url* "/search/text")
 (setv *sound-url* "/sounds/%s")
 
-;; GET helper
 (defn get-freesound [url &optional payload]
+  "GET helper function to compose the request"
   (setv xpayload {"token" *api-key*})
-  (if (!= None payload)
+  (if (coll? payload)
       (.update xpayload payload))
   (.get req
         (+ *base-url* url)
         :params xpayload))
 
-;; Search sound GET
-(defn search-sound [search-str]
-  (setv r (get-freesound
-            *search-url*
+(defn search-sound [search-str &optional filter-res]
+  "Search sound from freesound and return list of dictionaries
+   the result can be filtered by passing the optiona field filter-res
+   if filter-res is just one string the result is a list of that field extracted from the result (if there is some) 
+  if filter-res is a list then a new dict is composed"
+  (setv r (get-freesound *search-url*
             :payload {"query" search-str}))
-  (list (map
-          (fn [it] (.get it "id"))
-          (-> (.loads json r.text)
-              (.get "results")))))
+  (as-> (.loads json r.text) it
+        (.get it "results")
+        (if-not (none? filter-res)
+            (map (fn [curr]
+                   (if (coll? filter-res)
+                     (do
+                       (setv dict-filtered {})
+                       (for [el filter-res]
+                         (setv get-el (.get curr el))
+                         (if-not (none? get-el)
+                           (.update dict-filtered {(keyword el) get-el})))
+                       dict-filtered)
+                    (.get curr filter-res)))
+                 it)
+            it)
+        (list it)))
 
-;; Download sound by id and stores it in a new dir "samples" at root
 (defn download-sound [sound-id]
   (setv r (get-freesound
             (% *sound-url* sound-id)))
