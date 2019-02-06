@@ -21,9 +21,9 @@
 
 (defn search-sound [search-str &optional filter-res]
   "Search sound from freesound and return list of dictionaries
-   the result can be filtered by passing the optiona field filter-res
+   the result can be filtered by passing the optional field filter-res
    if filter-res is just one string the result is a list of that field extracted from the result (if there is some) 
-  if filter-res is a list then a new dict is composed"
+   if filter-res is a list then a new dict is composed"
   (setv r (get-freesound *search-url*
             :payload {"query" search-str}))
   (as-> (.loads json r.text) it
