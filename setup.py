@@ -1,11 +1,9 @@
-from setuptools import setup
-
-HYSRC = ['**.hy']
+from setuptools import setup, find_packages
 
 setup(
     name='hyfreesound',
     version='0.1',
-    packages=['hyfreesound'],
+    packages=find_packages(),
     author='c_aromando',
     author_email='carlo.aromando@gmail.com',
     url='https://github.com/carloaromando/hyfreesound',
@@ -13,6 +11,6 @@ setup(
         'hy==0.15.0',
         'requests==2.21.0'
     ],
-    package_data={'hyfreesound': HYSRC},
+    package_data={'hyfreesound': ['*.hy']},
     license='BSD-new'
 )

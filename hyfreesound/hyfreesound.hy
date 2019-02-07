@@ -68,31 +68,32 @@
 
 (defn set-access-token [code]
   (global *access-token*)
-  (setv r (post-freesound *token-url*
+  (setv rq (post-freesound *token-url*
             {"client_id" *client-id*
              "client_secret" *api-key*
              "grant_type" "authorization_code"
              "code" code}))
-  (if (= r.status_code req.codes.ok)
-      (as-> (.loads json r.text) it
+  (if (= rq.status_code req.codes.ok)
+      (as-> (.loads json rq.text) it
             (get it "access_token")
             (setv *access-token* it))
-      (.raise_for_status r)))
+      (.raise_for_status rq)))
 
 (defn with-auth-header []
   (if (none? *access-token*)
       (authorize-freesound))
   (identity {"Authorization" (+ "Bearer " *access-token*)}))
 
-(defn search-sound [search-str &optional filter-res]
+(defn search-sound [search-str &optional filter-req filter-res]
   "Search sound from freesound and return list of dictionaries
    the result can be filtered by passing the optional field filter-res
    if filter-res is just one string the result is a list of that field extracted from the result (if there is some) 
    if filter-res is a list then a new dict is composed
    check https://freesound.org/docs/api/resources_apiv2.html#text-search for possible fields"
-  (setv r (get-freesound *search-url*
-            :payload {"query" search-str}))
-  (as-> (.loads json r.text) it
+  (setv rq (get-freesound *search-url*
+                          :payload {"query" search-str
+                                    "filter" filter-req}))
+  (as-> (.loads json rq.text) it
         (get it "results")
         (if-not (none? filter-res)
             (map (fn [curr]
@@ -114,9 +115,9 @@
    is possible to specify a custom path and filename"
   (setv filename (if (none? filename) "sound.wav" filename)
         path (if (none? path) "./samples/" path)
-        r (get-freesound
+        rq (get-freesound
             (% *sound-url* sound-id)
             :auth True))
   (if-not (.exists os.path path)
     (.makedirs os path))
-  (.write (open (.format "{path}{filename}" :path path :filename filename) "wb") r.content))
+  (.write (open (.format "{path}{filename}" :path path :filename filename) "wb") rq.content))
