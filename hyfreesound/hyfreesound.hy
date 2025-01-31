@@ -4,8 +4,8 @@
         [requests :as req])
 
 ;; API credentials
-(setv *client-id* "fRxIldu3tCZb4WjdPhZI")
-(setv *api-key* "zX3zHJJy0ukDqKPIPNNKXr2ynmksbkEqyWW80d6W")
+(setv *client-id* "")
+(setv *api-key* "")
 
 ;; Freesound urls
 (setv *base-url* "https://www.freesound.org/apiv2")
